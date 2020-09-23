@@ -88,17 +88,16 @@ module.exports = app => {
         }
 
         //checar se o registro já existe
+        //coleto do body a chave
         const Bismt = req.body.BISMT;
 
+        //pesquiso ela no banco e armazeno o retorno (-1 caso não retorne nada a consulta)
         const foundMaterialIndex = materialSapMock
             .findIndex(material => material.BISMT === Bismt);
 
-        console.log("BISMT " + Bismt);
-        console.log("Found Material: " + foundMaterialIndex);
-
         //se registro não existir, sigo fazendo inserção
         if (foundMaterialIndex === -1) {
-            //materialSapMock.data.push(req.body);
+            //Leio o arquivo 
             fs.readFile('./api/data/materialSap.json', (err, data) => {
                 if (err) {
                     const status = 401
@@ -112,6 +111,8 @@ module.exports = app => {
 
                 //adiciona novo registro
                 data.materialSap.push(req.body)
+
+                //escrevo no arquivo a leitura acrescida do novo registro
                 var writeData = fs.writeFile('./api/data/materialSap.json', JSON.stringify(data), (err, result) => {
                     if (err) {
                         const status = 401
@@ -123,6 +124,7 @@ module.exports = app => {
 
             })
 
+            //retorno da consulta
             res.status(201).json({
                 MSGS: [{ "msg1": "msg1", "msg2": "msg2" }],
                 BISMT: req.body.BISMT,
@@ -136,7 +138,9 @@ module.exports = app => {
                 MSGV4: "Variável 4",
                 MSGTXT: "MENSAGEM ALFA DE 220 CARACTERES"
             })
-        } else {
+        }
+        //caso o regitro já exista, cai no else
+        else {
             res.status(404).json({
                 message: "Material já existe na base",
                 sucess: false,
